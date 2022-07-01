@@ -37,23 +37,24 @@ public class MainSpawner : MonoBehaviour
 
     private void Update()
     {
-
         if (_alienIsAlive)
             return;
-
+            
         if (_inflictCount == (_asteroidsStartSpawnCount * 3) - 3)//Когда остаётся один астеройд
         {
             _alienIsAlive = true;
+            Debug.Log("Спавним тарелку");
             AlienSpawner();
         }
 
-        if ( _inflictCount >= _asteroidsStartSpawnCount * 3)
+        if (_inflictCount >= _asteroidsStartSpawnCount * 3)
         {
             _inflictCount = 0;
             _asteroidsStartSpawnCount += 1;
             StartCoroutine(Delay(_asteroidsStartSpawnCount));
             return;
         }
+        
     }
 
     private void AsteroidSpawner(int startSpawnCount, GameObject prefab)
@@ -105,16 +106,22 @@ public class MainSpawner : MonoBehaviour
     }
 
 
-    //!!!!!!!!!!!!!!!!!
-    //Перенести
     private void OnEnable()
     {
-        EventBus.onDamageChecked += AsteroidDamageCount;
+        EventBus.onAsteroidDamageChecked += AsteroidDamageCount;
+        EventBus.onAlienDeathChecked += AlienDeath;
     }
 
     private void OnDisable()
     { 
-        EventBus.onDamageChecked -= AsteroidDamageCount;
+        EventBus.onAsteroidDamageChecked -= AsteroidDamageCount;
+        EventBus.onAsteroidDamageChecked -= AlienDeath;
+    }
+
+    public void AlienDeath()
+    {
+        _alienIsAlive = false;
+        _inflictCount += 1;
     }
 
     public void AsteroidDamageCount()

@@ -27,7 +27,7 @@ public class Alien : MonoBehaviour, IHitable
 
         _iShootable = this.gameObject.GetComponentInChildren<IShootable>();
         if (_iShootable == null)
-            Debug.LogError("_isootable is null");
+            Debug.LogError("_ishootable is null");
 
         InvokeRepeating("Shoot", 1, _delayForShooting);
     }
@@ -82,12 +82,12 @@ public class Alien : MonoBehaviour, IHitable
         IDamageible iDamageible = collision.gameObject.GetComponent<IDamageible>();
         if (iDamageible == null)
             return;
-        Debug.Log("Врезался!");
-        //iDamageible.InflictDamage();
+        iDamageible.InflictDamage();
     }
 
     public void HitHandler()
     {
-        Debug.Log("В тарелку попали");
+        Destroy(this.gameObject);
+        EventBus.onAlienDeathChecked?.Invoke();
     }
 }

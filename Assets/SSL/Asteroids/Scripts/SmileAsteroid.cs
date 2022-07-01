@@ -8,15 +8,16 @@ public class SmileAsteroid : Asteroid
     private GameObject _sadAsteroid;
     [SerializeField]
     private int _sadAsteroidSpawnCount = 2;
+    [SerializeField]
+    private int _giveScrore = 200;
 
     public override void HitHandler()
     {
         Destroy(this.gameObject);
 
-        EventBus.onDamageChecked?.Invoke();
+        EventBus.onAsteroidDamageChecked?.Invoke();
+        EventBus.onAsteroidScoreChecked?.Invoke(_giveScrore);
 
-        //Тут эффект спавним
-        //С помощью instantiate создание объекта sadAsteroid на котором висит скрипт sadAsteroid, который наследуется от этого скрипта и переопределяет этот метод
         for (int i = 0; i < _sadAsteroidSpawnCount; i++)
         {
             Quaternion rotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));

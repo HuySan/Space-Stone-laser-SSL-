@@ -270,7 +270,7 @@ MonoBehaviour:
   _checkLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  _delayForShooting: 0.7
+  _delayForShooting: 1.2
 --- !u!50 &8287046022862577983
 Rigidbody2D:
   serializedVersion: 4

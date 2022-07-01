@@ -20,7 +20,6 @@ public class Guns : MonoBehaviour, IShootable
 
     private IDamageible _iDamageible;
 
-    //P.s. пули должны вылетать когда пушка смотрит на игрока(Будем чекать руйкастом скорее всего)
     private void Start()
     {
         _targetLook = EventBus.onObjectTransfed?.Invoke();
@@ -42,6 +41,8 @@ public class Guns : MonoBehaviour, IShootable
 
     private void OrbitAround()
     {
+        if (_targetRotation == null)
+            return;
         this.transform.RotateAround(_targetRotation.position, Vector3.forward, _speedRotation * Time.deltaTime);
     }
 

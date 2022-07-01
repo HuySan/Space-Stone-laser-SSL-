@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System;
 
 public class Laser : MonoBehaviour
 {
@@ -8,11 +11,19 @@ public class Laser : MonoBehaviour
     private float _distanceRay = 100;
     [SerializeField]
     private LineRenderer _lineRenderer;
+
+    private int  _shotsCount = 3;
     [SerializeField]
-    private int _shotsCount = 3;
+    private GameObject _chargeGrid;
+    private Image[] _laserCharges;
+
     private int _maxShotCount;
     [SerializeField]
-    private float _timeToRecharge = 20;
+    private float _timeToRecharge = 10;
+    [SerializeField]
+    private List<TextMeshProUGUI> _timeToRechargeText;
+
+
     [SerializeField]
     private LayerMask _hitLayerMask;
 
@@ -21,6 +32,10 @@ public class Laser : MonoBehaviour
         if (_lineRenderer == null)
             Debug.LogError("Error: the lineRenderer was not added");
         _maxShotCount = _shotsCount;
+
+        _laserCharges = _chargeGrid.GetComponentsInChildren<Image>();
+
+        _timeToRechargeText.Reverse();
     }
 
     public void ShotLaser(Vector3 shootPosition)
@@ -37,9 +52,7 @@ public class Laser : MonoBehaviour
 
             if (hit.collider == null)
                 continue;
-            /* Asteroid asteroid = hit.collider.gameObject.GetComponent<Asteroid>();
-             if (asteroid != null)
-                 asteroid.ObjectDecay();*/
+
             IHitable iHitable = hit.collider.gameObject.GetComponent<IHitable>();
             if (iHitable != null)
                 iHitable.HitHandler();
@@ -47,22 +60,31 @@ public class Laser : MonoBehaviour
 
         StartCoroutine(DelayRay());
         _shotsCount--;
-        StartCoroutine(ChargeAccumulation());
+        _laserCharges[_shotsCount].gameObject.SetActive(false);
+
+        StartCoroutine(ChargeAccumulation(_timeToRechargeText[_shotsCount], _shotsCount));
     }
 
     IEnumerator DelayRay()
     {
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSeconds(0.1f);
         _lineRenderer.enabled = false;
     }
 
-    IEnumerator ChargeAccumulation()
+    IEnumerator ChargeAccumulation(TextMeshProUGUI timeText, int shotsCount)
     {
-//Заряды набираются одновременно, т.к. я выстрелил поочерёдно.Можно к каждому последуещему заряду прибавлять время предыдущего, тогда заряды будут долше наполняться
         if (_shotsCount >= _maxShotCount)
              yield break;
+        float temp = _timeToRecharge;
 
-        yield return new WaitForSeconds(_timeToRecharge);
+        while (temp >= 0)
+        {
+            timeText.text = temp.ToString();
+            yield return new WaitForSeconds(1);
+            temp--;
+        }
+
+        _laserCharges[shotsCount].gameObject.SetActive(true);
         _shotsCount++;
     }
 

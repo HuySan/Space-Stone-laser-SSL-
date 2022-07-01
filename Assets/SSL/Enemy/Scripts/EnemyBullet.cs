@@ -9,8 +9,7 @@ class EnemyBullet : Bullets
         IDamageible iDamageible = collision.gameObject.GetComponent<IDamageible>();
         if (iDamageible == null)
             return;
-       // Debug.Log("Попал!");
-        Destroy(this.gameObject);
-        //iDamageible.InflictDamage();
+
+        iDamageible.InflictDamage();
     }
 }

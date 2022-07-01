@@ -14,7 +14,7 @@ public abstract class Asteroid : MonoBehaviour, IHitable
     private IDamageible _iDamageible;
 
 
-    private void Start()
+    private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
         _vectorDirection = new List<Vector2> { Vector2.up, Vector2.one, -Vector2.one, Vector2.right, Vector2.left, Vector2.down };

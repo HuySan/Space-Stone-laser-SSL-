@@ -320,6 +320,7 @@ MonoBehaviour:
   _MinForce: 0.5
   _sadAsteroid: {fileID: 4186070494926953773, guid: 94b71d4ce06b36641bc297752cab6d80, type: 3}
   _sadAsteroidSpawnCount: 2
+  _giveScrore: 200
 --- !u!114 &-3825529464725598710
 MonoBehaviour:
   m_ObjectHideFlags: 0
