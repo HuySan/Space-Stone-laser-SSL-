@@ -18,7 +18,7 @@ public class Alien : MonoBehaviour, IHitable
 
     [SerializeField]
     private float _delayForShooting = 0.7f;
-
+    private AlienLogic _alienLogic;
 
     void Start()
     {
@@ -29,13 +29,14 @@ public class Alien : MonoBehaviour, IHitable
         if (_iShootable == null)
             Debug.LogError("_ishootable is null");
 
+        _alienLogic = new AlienLogic(this.transform, _defaultDirection, _possibleDirection);
         InvokeRepeating("Shoot", 1, _delayForShooting);
     }
 
     void Update()
     {
-        CheckingCollision();
-        Move();
+        _alienLogic.CheckingCollision(_distanceChekingRay, _checkLayerMask);
+        _alienLogic.Move(_speed);
     }
 
     //For clarity
@@ -51,10 +52,6 @@ public class Alien : MonoBehaviour, IHitable
         Gizmos.DrawWireCube(this.transform.position + _defaultDirection * hit.distance, new Vector2(1, 1));
     }*/
 
-    private void Move()
-    {
-        this.gameObject.transform.Translate(_defaultDirection * _speed * Time.deltaTime);
-    }
 
     private void Shoot()
     {
@@ -62,27 +59,9 @@ public class Alien : MonoBehaviour, IHitable
     }
 
 
-    private void CheckingCollision()
-    {
-        if (!Physics2D.BoxCast(this.transform.position, new Vector2(1, 1), 90f, _defaultDirection, _distanceChekingRay, _checkLayerMask))
-            return;
-
-        foreach (Vector2 direction in _possibleDirection)
-        {
-            _defaultDirection = direction;
-            RaycastHit2D hit = Physics2D.BoxCast(this.transform.position, new Vector2(1, 1), 90f, _defaultDirection, _distanceChekingRay, _checkLayerMask);
-            if (hit.collider)
-                continue;
-            return;
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        IDamageible iDamageible = collision.gameObject.GetComponent<IDamageible>();
-        if (iDamageible == null)
-            return;
-        iDamageible.InflictDamage();
+        _alienLogic.Trigger(collision);
     }
 
     public void HitHandler()

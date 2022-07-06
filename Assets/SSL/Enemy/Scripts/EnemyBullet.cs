@@ -11,5 +11,6 @@ class EnemyBullet : Bullets
             return;
 
         iDamageible.InflictDamage();
+        Destroy(this.gameObject);
     }
 }

@@ -1,0 +1,4 @@
+interface IDamageible
+{
+    void InflictDamage();
+}

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1539499934167669604}
   - component: {fileID: 1539499934167669605}
-  - component: {fileID: 1539499934167669607}
   - component: {fileID: 1539499934167669606}
   - component: {fileID: 1539499934167669592}
   m_Layer: 2
@@ -48,22 +47,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _bulletPrefab: {fileID: 6609993128634926746, guid: ca8982bae2cb242409386549299fe2ee, type: 3}
---- !u!114 &1539499934167669607
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1539499934167669603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af8bcff0cde83cf44963028df02831de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   _distanceRay: 100
-  _lineRenderer: {fileID: 1539499934167669606}
-  _shotsCount: 3
-  _timeToRecharge: 20
+  _lineRenderer: {fileID: 0}
+  _chargeGrid: {fileID: 0}
+  _timeToRecharge: 10
+  _timeToRechargeText: []
+  _hitLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!120 &1539499934167669606
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -339,6 +330,15 @@ MonoBehaviour:
   _inertia: 1
   _speedRotate: 4
   _firePoint: {fileID: 1539499934167669605}
+  _deathUiPanel: {fileID: 0}
+  _bestScoreText: {fileID: 0}
+  _nowScoreText: {fileID: 0}
+  _speedText: {fileID: 0}
+  _angleText: {fileID: 0}
+  _coordinatesText: {fileID: 0}
+  _scoreText: {fileID: 0}
+  _alienGiveScore: 500
+  _gridHeart: {fileID: 0}
 --- !u!61 &1539499934463721248
 BoxCollider2D:
   m_ObjectHideFlags: 0

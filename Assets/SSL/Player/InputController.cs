@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 class InputController : MonoBehaviour
@@ -59,13 +55,7 @@ class InputController : MonoBehaviour
 
         //Laser
         _input.Player.MouseRight.started += context => _iShooting.ShootLaser();
-       // if (!_input.Player.MouseRight.IsPressed())
-       //     _iShooting.shootLaser(false);
 
-        //   if (_input.Player.MouseRight.IsPressed())
-        //      _iShooting.shootLaser(true);
-        //   else
-        //    _iShooting.shootLaser(false);
     }
 
 

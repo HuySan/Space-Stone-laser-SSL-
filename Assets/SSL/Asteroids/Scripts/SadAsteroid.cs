@@ -11,7 +11,5 @@ public class SadAsteroid : Asteroid
         Destroy(gameObject);
         EventBus.onAsteroidDamageChecked?.Invoke();
         EventBus.onAsteroidScoreChecked?.Invoke(_giveScrore);
-        //Проигрываение звук смэрти
-        //Спавн эффекта
     }
 }

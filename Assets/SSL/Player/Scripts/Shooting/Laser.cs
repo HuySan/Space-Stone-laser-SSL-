@@ -5,48 +5,44 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-public class Laser : MonoBehaviour
+public class Laser
 {
-    [SerializeField] 
-    private float _distanceRay = 100;
-    [SerializeField]
     private LineRenderer _lineRenderer;
-
-    private int  _shotsCount = 3;
-    [SerializeField]
-    private GameObject _chargeGrid;
+    private Transform _transform;
+    private LayerMask _hitLayerMask;
     private Image[] _laserCharges;
-
-    private int _maxShotCount;
-    [SerializeField]
-    private float _timeToRecharge = 10;
-    [SerializeField]
     private List<TextMeshProUGUI> _timeToRechargeText;
 
+    private float _timeToRecharge;
 
-    [SerializeField]
-    private LayerMask _hitLayerMask;
+    private int _shotsCount = 3;
+    private int _maxShotCount;
 
-    private void Start()
-    {        
-        if (_lineRenderer == null)
-            Debug.LogError("Error: the lineRenderer was not added");
+    ICoroutineStartable _coroutineStartable;
+
+    public Laser(ICoroutineStartable coroutineStartable, LineRenderer lineRenderer, Transform transform, LayerMask hitLayerMask, Image[] laserCharges, List<TextMeshProUGUI> timeToRechargeText)
+    {
+        _lineRenderer = lineRenderer;
+        _transform = transform;
+        _hitLayerMask = hitLayerMask;
+        _laserCharges = laserCharges;
+        _timeToRechargeText = timeToRechargeText;
+        _coroutineStartable = coroutineStartable;
+
         _maxShotCount = _shotsCount;
-
-        _laserCharges = _chargeGrid.GetComponentsInChildren<Image>();
-
-        _timeToRechargeText.Reverse();
     }
 
-    public void ShotLaser(Vector3 shootPosition)
+    public void ShotLaser(Vector3 shootPosition, float distanceRay, float timeToRecharge)
     {
+        _timeToRecharge = timeToRecharge;
+
         if (_shotsCount == 0)
             return;
 
         _lineRenderer.enabled = true;
 
-        RaycastHit2D[] hits = Physics2D.RaycastAll(shootPosition, transform.up * _distanceRay, _distanceRay, _hitLayerMask);       
-        Draw2DRay(shootPosition, transform.up * _distanceRay);
+        RaycastHit2D[] hits = Physics2D.RaycastAll(shootPosition, _transform.up * distanceRay, distanceRay, _hitLayerMask);       
+        Draw2DRay(shootPosition, _transform.up * distanceRay);
         foreach(RaycastHit2D hit in hits)
         {
 
@@ -58,11 +54,14 @@ public class Laser : MonoBehaviour
                 iHitable.HitHandler();
         }
 
-        StartCoroutine(DelayRay());
+
+        _coroutineStartable.StartChildCoroutine(DelayRay());
+
         _shotsCount--;
         _laserCharges[_shotsCount].gameObject.SetActive(false);
+        //Debug.Log(_shotsCount);
 
-        StartCoroutine(ChargeAccumulation(_timeToRechargeText[_shotsCount], _shotsCount));
+        _coroutineStartable.StartChildCoroutine(ChargeAccumulation(_timeToRechargeText[_shotsCount], _shotsCount));
     }
 
     IEnumerator DelayRay()
@@ -85,7 +84,8 @@ public class Laser : MonoBehaviour
         }
 
         _laserCharges[shotsCount].gameObject.SetActive(true);
-        _shotsCount++;
+        if (shotsCount == 0)
+            _shotsCount = _maxShotCount;
     }
 
     private void Draw2DRay(Vector2 startPosition, Vector2 endPosition)

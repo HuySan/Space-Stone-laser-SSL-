@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
+public class Character : MonoBehaviour,IMovable, IShooting, IDamageible
 {
     [SerializeField]
     private float _speed = 0;
@@ -15,8 +15,16 @@ public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
     private float _inertia = 2.5f;
     [SerializeField]
     private float _speedRotate = 10f;
+
     [SerializeField]
     private FirePoint _firePoint;
+
+    [SerializeField]
+    private GameObject _deathUiPanel;
+    [SerializeField]
+    private TextMeshProUGUI _bestScoreText;
+    [SerializeField]
+    private TextMeshProUGUI _nowScoreText;
 
     [SerializeField]
     private TextMeshProUGUI _speedText;
@@ -36,94 +44,80 @@ public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
     private GameObject _gridHeart;
     private Image[] _hearts;
 
-    private Vector2 _targetDirection;
-    private Vector2 _directionMove;
     private int _healthCount;
+
+    private TextConverterLogic _logic;
+    private MoverLogic _moverLogic;
+    private DeathLogic _deathLogic;
+    private SafeSystem _safeSystem;
+
+    private bool _playerIsAlive;
 
     private void Awake()
     {
+        _playerIsAlive = true;
+
+        _logic = new TextConverterLogic(this.gameObject);
+        _moverLogic = new MoverLogic(_speed, _maxSpeed, _speedRotate, _acceleration, _inertia, this.transform);
+
          _hearts = _gridHeart.GetComponentsInChildren<Image>();
         _healthCount = _hearts.Length;
-       // _hearts[_healthCount].gameObject.SetActive(false);
+        _deathLogic = new DeathLogic(_healthCount, this.gameObject, _deathUiPanel, _hearts);
+        _safeSystem = new SafeSystem(_nowScoreText, _bestScoreText);
     }
 
     void Update()
     {
-        TextConverter();
-    }
 
-    private void TextConverter()
-    {
-        //speed
-        if (Mathf.Floor(_speed) > 0)
-            _speedText.text = $"{Mathf.Floor(_speed)}kkk km/h";
-
-        //angle
-        float angle = this.gameObject.transform.eulerAngles.z;
-        _angleText.text = $"{Mathf.Floor(angle)}";
-
-        //coordinates
-        float x = Mathf.Floor(this.gameObject.transform.position.x);
-        float y = Mathf.Floor(this.gameObject.transform.position.y);
-        _coordinatesText.text = $"X: {x} | Y: {y}";
-
-        //score
-        if (_score != 0)
-            _scoreText.text = $"{_score}";
-    }
-
-    public void LookAtMouse(Vector2 positionMouse)
-    {
-        _targetDirection = Camera.main.ScreenToWorldPoint(positionMouse) - transform.position;
-        float angle = Mathf.Atan2(_targetDirection.x, _targetDirection.y) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.AngleAxis(angle, -Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, _speedRotate * Time.deltaTime);
+        if (!_playerIsAlive)
+            return;
+        _logic.TextConverter(_speed, _score, _angleText, _speedText, _coordinatesText, _scoreText);
     }
 
     public void MoveForward(Vector2 direction)
     {
-          _directionMove = direction;
-
-          if (_speed < _maxSpeed)
-              _speed += _acceleration * Time.deltaTime;
-          transform.Translate(direction *  _speed * Time.deltaTime);
+        if (!_playerIsAlive)
+            return;
+        _moverLogic.MoveForward(direction, out float speed);
+        _speed = speed;
     }
 
-    public void MoveForward(bool isPressed)
+    //Вызывается, если нажимаем на кнопку движения
+    public void MoveForward(bool isPressed = true)
     {
-        if (isPressed)
+        if (!_playerIsAlive)
             return;
+        _moverLogic.MoveForward(isPressed, out float speed);
+        _speed = speed;
+    }
 
-        if (_speed <= 0)
+    public void LookAtMouse(Vector2 position)
+    {
+        if (!_playerIsAlive)
             return;
-
-        _speed -= _inertia * Time.deltaTime;
-        transform.Translate(_directionMove * _speed * Time.deltaTime);
+        _moverLogic.LookAtMouse(position);
     }
 
     public void ShootBullet()
     {
+        if (!_playerIsAlive)
+            return;
         _firePoint.Bullet();
     }
 
     public void ShootLaser()
     {
+        if (!_playerIsAlive)
+            return;
         _firePoint.Laser();
     }
 
     public void InflictDamage()
     {
-        _healthCount--;
-        _hearts[_healthCount].gameObject.SetActive(false);
-        //Отнимаем от ui сердце
-        if (_healthCount == 0)
-        {
-            Destroy(this.gameObject);
-            //экран смерти
-            _healthCount = 3;
-        }
-        //спавним эффект
-        //Вызываем скрипт с проигрыванием аудио(Думаю сделать всю работу аудио в отдельном скрипте и из него вызывать методы)
+        if (!_playerIsAlive)
+            return;
+        _deathLogic.InflictDamage();
+        _safeSystem.SaveAndShowScore(_score);
     }
 
     private void OnEnable()
@@ -131,6 +125,7 @@ public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
         EventBus.onObjectTransfed += Init;
         EventBus.onAsteroidScoreChecked += GetAsteroidScore;
         EventBus.onAlienDeathChecked += AlienGetScore;
+        EventBus.onPlayerIsAlived += PlayerIsAlive;
     }
 
     private void OnDisable()
@@ -138,6 +133,7 @@ public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
         EventBus.onObjectTransfed -= Init;
         EventBus.onAsteroidScoreChecked += GetAsteroidScore;
         EventBus.onAlienDeathChecked -= AlienGetScore;
+        EventBus.onPlayerIsAlived -= PlayerIsAlive;
     }
 
     private void AlienGetScore()
@@ -155,4 +151,8 @@ public class Character : MonoBehaviour, IMovable, IShooting, IDamageible
         return this.gameObject;
     }
 
+    private void PlayerIsAlive()
+    {
+        _playerIsAlive = false;
+    }
 }
